@@ -13,6 +13,7 @@
 #include "Princess.h"
 #include "Menu.h"
 #include "AudioManager.h"
+#include "Barrel_Elim.h"
 
 enum class GameState {
     MENU,
@@ -33,6 +34,7 @@ private:
     std::vector<std::unique_ptr<Barrel>> barrels;
     std::unique_ptr<DonkeyKong> donkeyKong;
     std::unique_ptr<Princess> princess;
+    std::unique_ptr<Barrel_Elim> barrelElim;
     std::unique_ptr<Menu> menu;
     
     AudioManager* audioManager;

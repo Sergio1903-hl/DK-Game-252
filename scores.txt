@@ -1,1 +1,3 @@
 Player,1400,win
+Player,2200,win
+Player,1880,win

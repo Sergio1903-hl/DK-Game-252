@@ -198,6 +198,11 @@ void Game::render() {
         barrel->render(window);
     }
     
+    // Render eliminator block
+    if (barrelElim) {
+        barrelElim->render(window);
+    }
+    
     // Render player
     if (player) {
         player->render(window);
@@ -299,6 +304,9 @@ void Game::setupWorld() {
     
     // Princess más cerca de DK en la plataforma superior
     princess = std::make_unique<Princess>(350.0f, 45.0f, SCALE);
+    
+    // Bloque eliminador en la esquina inferior derecha de la plataforma del jugador
+    barrelElim = std::make_unique<Barrel_Elim>(1150.0f, 740.0f, SCALE);
 }
 
 void Game::spawnBarrel() {
@@ -367,12 +375,11 @@ void Game::checkCollisions() {
         for (auto it = barrels.begin(); it != barrels.end();) {
             sf::FloatRect barrelBounds = (*it)->getBounds();
             
-            // Detectar golpe con Q
+            // Detectar golpe con Q (no da puntos, solo elimina)
             if (isHitting && hitBoxBounds.intersects(barrelBounds) && (*it)->isActive()) {
-                (*it)->hit();  // Marcar barril como inactivo
-                updateScore(100);  // Dar 100 puntos por golpear
-                audioManager->playSound("barrel_roll");  // Sonido de impacto
-                it = barrels.erase(it);  // Eliminar barril
+                (*it)->hit();
+                audioManager->playSound("barrel_roll");
+                it = barrels.erase(it);
                 continue;
             }
             
@@ -385,16 +392,29 @@ void Game::checkCollisions() {
                 
                 // Si el jugador está arriba del barril (no intersección profunda)
                 if (playerBottom < barrelCenterY) {
-                    // El jugador está saltando sobre el barril
-                    updateScore(100);  // Dar 100 puntos
+                    // El jugador está saltando sobre el barril: dar 110 puntos y eliminar el barril
+                    updateScore(110);
                     audioManager->playSound("barrel_roll");
-                    it = barrels.erase(it);  // Eliminar barril
+                    it = barrels.erase(it);
                     continue;
                 } else {
                     // Colisión normal - el jugador muere
                     gameOverScreen();
                     return;
                 }
+            }
+            ++it;
+        }
+    }
+
+    // Eliminar barriles que toquen el bloque eliminador (sin puntos)
+    if (barrelElim) {
+        sf::FloatRect elimBounds = barrelElim->getBounds();
+        for (auto it = barrels.begin(); it != barrels.end();) {
+            sf::FloatRect barrelBounds = (*it)->getBounds();
+            if (barrelBounds.intersects(elimBounds)) {
+                it = barrels.erase(it);
+                continue;
             }
             ++it;
         }
