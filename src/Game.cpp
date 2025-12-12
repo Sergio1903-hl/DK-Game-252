@@ -1,5 +1,6 @@
 #include "../include/Game.h"
 #include <iostream>
+#include <fstream>
 
 Game::Game() 
     : window(sf::VideoMode(1200, 800), "Donkey Kong")
@@ -23,6 +24,9 @@ Game::Game()
     
     // Create menu
     menu = std::make_unique<Menu>();
+    
+    // Ask player name once at startup (console input)
+    promptPlayerName();
     
     // Load assets
     loadAssets();
@@ -70,8 +74,12 @@ void Game::processEvents() {
                 if (event.key.code == sf::Keyboard::Escape) {
                     resumeGame();
                 }
+                // Volver al menú principal desde pausa
                 if (event.key.code == sf::Keyboard::M) {
                     gameState = GameState::MENU;
+                    if (menu) {
+                        menu->setState(MenuState::MAIN_MENU);
+                    }
                     audioManager->stopMusic();
                 }
             }
@@ -289,8 +297,8 @@ void Game::setupWorld() {
     // DK está en la plataforma Top
     donkeyKong = std::make_unique<DonkeyKong>(450.0f, 45.0f, SCALE);
     
-    // Princess está a la izquierda
-    princess = std::make_unique<Princess>(150.0f, 45.0f, SCALE);
+    // Princess más cerca de DK en la plataforma superior
+    princess = std::make_unique<Princess>(350.0f, 45.0f, SCALE);
 }
 
 void Game::spawnBarrel() {
@@ -316,7 +324,8 @@ void Game::checkCollisions() {
     // Obtener estado del jugador
     b2Vec2 playerPos = b2Body_GetPosition(player->getBodyId());
     b2Vec2 playerVel = b2Body_GetLinearVelocity(player->getBodyId());
-    float playerBottom = (playerPos.y * SCALE) + 14.0f;
+    // Usar los bounds reales del jugador para detectar pies sobre plataforma
+    float playerBottom = playerBounds.top + playerBounds.height;
     
     // Si está escalando hacia arriba en una escalera, FORZAR el movimiento hacia arriba
     // ignorando las colisiones de Box2D
@@ -495,6 +504,7 @@ void Game::gameOverScreen() {
         // La música sigue sonando, no la detenemos
     } else {
         // Game over definitivo
+        saveScoreEntry("game_over");
         gameState = GameState::GAME_OVER;
         audioManager->stopMusic();
         audioManager->playSound("game_over");
@@ -506,6 +516,7 @@ void Game::winLevel() {
     audioManager->playSound("win");
     level++;
     score += 1000;
+    saveScoreEntry("win");
     
     // After celebration, start next level
     resetLevel();
@@ -522,4 +533,26 @@ void Game::handleMenuInput(sf::Event& event) {
     // Update audio volumes from menu
     audioManager->setMusicVolume(menu->getMusicVolume());
     audioManager->setSoundVolume(menu->getSoundVolume());
+}
+
+void Game::promptPlayerName() {
+    // Para evitar bloquear al iniciar (especialmente si se ejecuta sin consola),
+    // usar un nombre por defecto. Si hay entrada disponible en stdin, leerla.
+    playerName = "Player";
+    if (std::cin.good() && std::cin.rdbuf()->in_avail() > 0) {
+        std::cout << "Ingresa tu nombre: ";
+        std::getline(std::cin >> std::ws, playerName);
+        if (playerName.empty()) {
+            playerName = "Player";
+        }
+    }
+}
+
+void Game::saveScoreEntry(const std::string& reason) {
+    std::ofstream ofs("scores.txt", std::ios::app);
+    if (!ofs.is_open()) {
+        std::cerr << "No se pudo abrir scores.txt para escribir" << std::endl;
+        return;
+    }
+    ofs << playerName << "," << score << "," << reason << "\n";
 }

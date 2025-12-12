@@ -4,6 +4,7 @@
 #include <box2d/box2d.h>
 #include <vector>
 #include <memory>
+#include <string>
 #include "Player.h"
 #include "Platform.h"
 #include "Ladder.h"
@@ -54,6 +55,7 @@ private:
     int level;
     bool gameOver;
     GameState gameState;
+    std::string playerName;
     
     const float SCALE = 30.0f; // pixels per meter
     
@@ -83,4 +85,7 @@ private:
     void winLevel();
     
     void loadAssets();
+
+    void promptPlayerName();
+    void saveScoreEntry(const std::string& reason);
 };

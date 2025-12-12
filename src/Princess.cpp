@@ -14,9 +14,9 @@ Princess::Princess(float x, float y, float scale)
     }
     else {
         sprite.setTexture(texture);
-        // Auto-escalar al tamaño deseado (30x50)
-        float targetWidth = 30.0f;
-        float targetHeight = 50.0f;
+        // Auto-escalar al tamaño deseado (45x75) para mayor visibilidad
+        float targetWidth = 45.0f;
+        float targetHeight = 75.0f;
         float scaleX = targetWidth / texture.getSize().x;
         float scaleY = targetHeight / texture.getSize().y;
         sprite.setScale(scaleX, scaleY);
@@ -40,8 +40,8 @@ void Princess::update(float dt) {
         
         // Asegurar que la escala se mantenga
         if (texture.getSize().x > 0) {
-            float targetWidth = 30.0f;
-            float targetHeight = 50.0f;
+            float targetWidth = 45.0f;
+            float targetHeight = 75.0f;
             float scaleX = targetWidth / texture.getSize().x;
             float scaleY = targetHeight / texture.getSize().y;
             sprite.setScale(scaleX, scaleY);
@@ -52,16 +52,16 @@ void Princess::update(float dt) {
 void Princess::render(sf::RenderWindow& window) {
     // If no texture, draw a simple pink rectangle
     if (texture.getSize().x == 0) {
-        sf::RectangleShape rect(sf::Vector2f(30, 50));
+        sf::RectangleShape rect(sf::Vector2f(45, 75));
         rect.setPosition(x, y);
         rect.setFillColor(sf::Color(255, 192, 203)); // Pink
-        rect.setOrigin(15, 25);
+        rect.setOrigin(22.5f, 37.5f);
         window.draw(rect);
         
         // Crown
-        sf::CircleShape crown(8, 3);
+        sf::CircleShape crown(10, 3);
         crown.setFillColor(sf::Color::Yellow);
-        crown.setPosition(x - 5, y - 30);
+        crown.setPosition(x - 7, y - 45);
         window.draw(crown);
     }
     else {
@@ -70,5 +70,5 @@ void Princess::render(sf::RenderWindow& window) {
 }
 
 sf::FloatRect Princess::getBounds() const {
-    return sf::FloatRect(x - 15, y - 25, 30, 50);
+    return sf::FloatRect(x - 22.5f, y - 37.5f, 45, 75);
 }

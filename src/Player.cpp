@@ -4,8 +4,8 @@
 
 Player::Player(b2WorldId worldId, float x, float y, float scale) 
     : scale(scale)
-    , width(18.0f)
-    , height(28.0f)
+    , width(36.0f)
+    , height(56.0f)
     , onGround(false)
     , onLadder(false)
     , climbing(false)
